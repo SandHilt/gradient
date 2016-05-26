@@ -1,0 +1,5 @@
+{
+    "scripts": {
+        "start": "browser-sync start --server --files index.html css/main.css js/main.js"
+    }
+}
