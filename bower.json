@@ -13,6 +13,6 @@
     "tests"
   ],
   "dependencies": {
-    "normalize-css": "normalize.css#^4.1.1"
+    "normalize-css": "normalize.css#latest"
   }
 }
