@@ -63,13 +63,16 @@ if (!isGradient) {
             aux = "";
         }
 
-//        lastColor.direction = [main, aux];
+        //        lastColor.direction = [main, aux];
 
         if (!lastColor) {
             lastColor = {};
-            lastColor.cor = new Map([["primary", new Color()],["secondary", new Color()]]);
+            lastColor.cor = new Map([
+                ["primary", new Color()],
+                ["secondary", new Color()]
+            ]);
         } else {
-            while(true) {
+            while (true) {
                 let primary = new Color();
                 let secondary = new Color();
 
