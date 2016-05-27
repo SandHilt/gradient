@@ -1,7 +1,6 @@
-let x = document.getElementsByTagName('html')[0];
-let isGradient = x.classList.contains("cssgradients") | false;
-const MAX_BUFFER = 5;
-let buffer = [];
+let html = document.getElementsByTagName('html')[0];
+let isGradient = html.classList.contains("cssgradients") | false;
+let lastColor = null;
 
 class Color {
     constructor() {
@@ -10,23 +9,45 @@ class Color {
         this.b = Math.floor(Math.random() * 255);
     }
 
+    compareColor(color) {
+        if ((this.r == color.r) && (this.g == color.g) && (this.b == color.b)) {
+            return true;
+        }
+
+        return false;
+    }
+
     showColor() {
         return `rgb(${this.r},${this.g},${this.b})`;
     }
 }
 
-
-x.addEventListener("click", () => {
-    let addColorBuffer = (color) => {
-        if(buffer.length + 1 > MAX_BUFFER){
-            buffer.pop();
+/**
+ * Se não houver a opção de Gradiente no CSS,
+ * ele utilizará apenas cor.
+ */
+if (!isGradient) {
+    html.addEventListener("click", () => {
+        if (!lastColor) {
+            lastColor = {};
+            lastColor.cor = new Color();
+        } else {
+            while (true) {
+                let temp = new Color();
+                if (!temp.compareColor(lastColor.cor)) {
+                    lastColor.cor = temp;
+                    break;
+                }
+            }
         }
-        buffer.push(color);
-    };
 
-    let color = {};
-
-    if(isGradient){
+        html.style.background = lastColor.cor.showColor();
+    }, false);
+    /**
+     * Caso contrário, trabalhará com Gradiente de duas cores.
+     */
+} else {
+    html.addEventListener("click", () => {
         let pos = ["top", "right", "bottom", "left", "deg"];
         let getPos = () => Math.floor(Math.random() * pos.length);
 
@@ -34,7 +55,7 @@ x.addEventListener("click", () => {
         let aux = pos[main];
         pos[main] = "";
 
-        if(aux !== "deg"){
+        if (aux !== "deg") {
             main = `to ${aux}`;
             aux = " " + pos[getPos()];
         } else {
@@ -42,22 +63,30 @@ x.addEventListener("click", () => {
             aux = "";
         }
 
-        color.direction = [main, aux];
-        color.cor = [new Color(), new Color()];
+//        lastColor.direction = [main, aux];
 
-        let cor1 = color.cor[0].showColor();
-        let cor2 = color.cor[1].showColor();
+        if (!lastColor) {
+            lastColor = {};
+            lastColor.cor = new Map([["primary", new Color()],["secondary", new Color()]]);
+        } else {
+            while(true) {
+                let primary = new Color();
+                let secondary = new Color();
 
-        x.style.background = `linear-gradient(${main}${aux}, ${cor1}, ${cor2})`;
-    } else {
-        color.cor = new Color();
+                if (!primary.compareColor(lastColor.cor.get("primary")) && !primary.compareColor(lastColor.cor.get("secondary"))) {
+                    lastColor.cor.set("primary", primary);
+                    lastColor.cor.set("secondary", secondary);
+                    break;
+                }
+            }
+        }
 
-        x.style.background = color.cor.showColor();
-    }
+        let cor1 = lastColor.cor.get("primary").showColor();
+        let cor2 = lastColor.cor.get("secondary").showColor();
 
-    addColorBuffer(color);
+        console.log(`cor1: ${cor1}, cor2: ${cor2}`);
 
-    // console.log(x.style.background);
-    console.dir(buffer);
+        html.style.background = `linear-gradient(${main}${aux}, ${cor1}, ${cor2})`;
+    }, false);
 
-}, false);
+}
