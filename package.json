@@ -1,5 +1,18 @@
 {
-    "scripts": {
-        "start": "browser-sync start --server --files index.html css/main.css js/main.js"
-    }
+  "scripts": {
+    "build": "babel js/main.js -o js/main.min.js",
+    "start": "browser-sync start --server --files index.html css/main.css js/main.js",
+    "css" : "postcss --use autoprefixer css/main.css -o css/main.min.css"
+  },
+  "devDependencies": {
+    "autoprefixer": "^6.3.6",
+    "babel-cli": "^6.9.0",
+    "babel-preset-es2015": "^6.9.0",
+    "postcss-cli": "^2.5.2"
+  },
+  "babel": {
+    "presets": [
+      "es2015"
+    ]
+  }
 }

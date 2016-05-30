@@ -1,6 +1,6 @@
-let html = document.getElementsByTagName('html')[0];
-let isGradient = html.classList.contains("cssgradients") | false;
+let isGradient = document.body.parentNode.classList.contains("cssgradients") | false;
 let lastColor = null;
+let lock = false;
 
 class Color {
     constructor() {
@@ -27,7 +27,7 @@ class Color {
  * ele utilizará apenas cor.
  */
 if (!isGradient) {
-    html.addEventListener("click", () => {
+    document.body.addEventListener("click", () => {
         if (!lastColor) {
             lastColor = {};
             lastColor.cor = new Color();
@@ -41,13 +41,13 @@ if (!isGradient) {
             }
         }
 
-        html.style.background = lastColor.cor.showColor();
+        document.body.style.background = lastColor.cor.showColor();
     }, false);
     /**
      * Caso contrário, trabalhará com Gradiente de duas cores.
      */
 } else {
-    html.addEventListener("click", () => {
+    document.body.addEventListener("click", () => {
         let pos = ["top", "right", "bottom", "left", "deg"];
         let getPos = () => Math.floor(Math.random() * pos.length);
 
@@ -63,8 +63,10 @@ if (!isGradient) {
             aux = "";
         }
 
-        //        lastColor.direction = [main, aux];
-
+        /**
+         * Se a cor do gradiente não foi definida,
+         * então ele criará um vetor de cores
+         */
         if (!lastColor) {
             lastColor = {};
             lastColor.cor = new Map([
@@ -76,7 +78,7 @@ if (!isGradient) {
                 let primary = new Color();
                 let secondary = new Color();
 
-                if (!primary.compareColor(lastColor.cor.get("primary")) && !primary.compareColor(lastColor.cor.get("secondary"))) {
+                if (!primary.compareColor(lastColor.cor.get("primary")) && !secondary.compareColor(lastColor.cor.get("secondary"))) {
                     lastColor.cor.set("primary", primary);
                     lastColor.cor.set("secondary", secondary);
                     break;
@@ -87,9 +89,29 @@ if (!isGradient) {
         let cor1 = lastColor.cor.get("primary").showColor();
         let cor2 = lastColor.cor.get("secondary").showColor();
 
-        console.log(`cor1: ${cor1}, cor2: ${cor2}`);
+        // console.log(`cor1: ${cor1}, cor2: ${cor2}`);
 
-        html.style.background = `linear-gradient(${main}${aux}, ${cor1}, ${cor2})`;
+        /**
+         * Promessa para ver se o DOM não está
+         * alterando asyncronamente
+         */
+        let promise = new Promise((r, j) => {
+            if (!lock) {
+                lock = true;
+                r();
+            } else {
+                j();
+            }
+        });
+
+        promise.then((r) => {
+            document.body.style.background = `linear-gradient(${main}${aux}, ${cor1}, ${cor2})`;
+            lock = false;
+        }, (j) => {
+            console.log(`Sorry - ${new Date()}`);
+        });
+
+        // document.body.style.background = `linear-gradient(${main}${aux}, ${cor1}, ${cor2})`;
     }, false);
 
 }
